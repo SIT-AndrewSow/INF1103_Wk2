@@ -11,9 +11,9 @@ while True:
         print("Final inventory:", inventory)
         break
     
-    # check if input is a valid number
+    # check if input is a valid number, isdigit checks for negative sign and returns false
     if not stockQuant.isdigit():
-        print("Invalid input. Please enter a valid number.")
+        print("Invalid input. Please enter a valid positive number.")
     else:
         stockQuant = int(stockQuant)
         inventory += stockQuant
