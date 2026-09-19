@@ -9,11 +9,11 @@ def get_valid_input():
         return "quit"
     elif not user_input.isdigit():
         return "invalid"
-    return user_input
+    return int(user_input)
 
 
 def process_delivery(current_total, new_value):
-    new_total = 0
+    new_total = current_total + new_value
     return new_total
 
 
@@ -63,13 +63,16 @@ def main():
     
     while not exit_program:
         input_res = get_valid_input()
+        
         if input_res == "quit":
-            print(f"Total Units Processed:{inventory} and the number of Failed/Rejected Entries:{failed_entries}.")
+            print(f"Total Deliveries Processed:{inventory} and the number of Failed/Rejected Entries:{failed_entries}.")
             break
         elif input_res == "invalid":
             print("Invalid input. Please enter a valid positive number.")
             failedEntries += 1
             continue
+        
+        inventory = process_delivery(inventory, input_res)
             
         
         
