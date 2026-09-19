@@ -18,8 +18,8 @@ def process_delivery(current_total, new_value):
 
 
 def calculate_tax(amount):
-    tax = 0
-    return tax
+    tax = amount * 0.1
+    print(f"The tax for this delivery is {tax}")
 
 
 def generate_report(total_units, failed_entries):
@@ -57,6 +57,7 @@ def main():
     
     # local variables
     inventory = 0
+    total_amount  = 0
     tax_amount = 0
     failed_entries  = 0
     exit_program = False
@@ -72,8 +73,9 @@ def main():
             failedEntries += 1
             continue
         
-        inventory = process_delivery(inventory, input_res)
-            
+        inventory += 1
+        total_amount = process_delivery(total_amount, input_res)
+        calculate_tax(input_res)            
         
         
 # __name__ (Program Entry Point)
