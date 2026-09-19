@@ -18,66 +18,37 @@ def process_delivery(current_total, new_value):
 
 
 def calculate_tax(amount):
-    tax = amount * 0.1
-    print(f"The tax for this delivery is {tax}")
+    return amount * TAX_RATE
 
 
 def generate_report(total_units, failed_entries):
+    print(f"Total Deliveries Processed:{total_units} and the number of Failed/Rejected Entries:{failed_entries}.")
     return
 
-
-'''
-while True:
-    
-    # check if the inventory limit has been exceeded
-    if inventory > 500:
-        print("Inventory limit exceeded. Cannot add more stock.")
-        break
-    
-    # check if the user wants to quit
-    if stockQuant == "quit": 
-        print(f"Total Units Processed:{inventory} and the number of Failed/Rejected Entries:{failedEntries}.")
-        break
-    
-    # check if input is a valid number, isdigit checks for negative sign and returns false
-    if not stockQuant.isdigit():
-        print("Invalid input. Please enter a valid positive number.")
-        failedEntries += 1
-    else:
-        stockQuant = int(stockQuant)
-        inventory += stockQuant
-        print(f"Current inventory: {inventory}")
-
-'''
     
 def main():
-    """
-    Main function to run inventory auditor program.
-    """
-    
     # local variables
     inventory = 0
-    total_amount  = 0
-    tax_amount = 0
-    failed_entries  = 0
-    exit_program = False
+    deliveries_count = 0
+    failed_entries = 0
     
-    while not exit_program:
+    while True:
         input_res = get_valid_input()
         
         if input_res == "quit":
-            print(f"Total Deliveries Processed:{inventory} and the number of Failed/Rejected Entries:{failed_entries}.")
+            generate_report(deliveries_count, failed_entries)
             break
         elif input_res == "invalid":
             print("Invalid input. Please enter a valid positive number.")
-            failedEntries += 1
+            failed_entries += 1
             continue
         
-        inventory += 1
-        total_amount = process_delivery(total_amount, input_res)
-        calculate_tax(input_res)            
+        deliveries_count += 1
+        inventory = process_delivery(inventory, input_res)
+        tax = calculate_tax(input_res)
+        print(f"The tax for this delivery is :{tax:.2f}")
+        print(f"Current inventory: {inventory}")
+              
         
-        
-# __name__ (Program Entry Point)
 if __name__=="__main__":
     main()
