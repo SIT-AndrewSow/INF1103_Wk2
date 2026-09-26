@@ -61,9 +61,13 @@ def calculate_tax(amount):
     return amount * TAX_RATE
 
 
-def generate_report(transaction_history, failed_entries):
-    print(f"Total Transactions Processed:{len(transaction_history)} and the number of Failed/Rejected Entries:{failed_entries}.")
-    print(f"\n-----------\nTRANSACTION HISTORY:\n-----------\n")
+def generate_report(inventory, failed_entries):
+    print(f"\nThe number of Failed/Rejected Entries:{failed_entries}.")
+    
+    #print inventory
+    print(f"\n-----------------\nINVENTORY\n-----------------\n")
+    for item in inventory:
+        print(f"ID: {item[ITEM_FIELDS["id"]]}. Product: {item[ITEM_FIELDS["name"]]}, Quantity: {item[ITEM_FIELDS["quantity"]]}, Transaction History: {", ".join(str(i) for i in item[ITEM_FIELDS["transaction_history"]])}\n")
     return
 
 
@@ -71,24 +75,16 @@ def load_inventory():
     # check if json exist if not return empty
     try:
         with open("inventory.json", "r", encoding="utf-8") as file:
-            loaded_data = json.load(file)
-
-        inventory = loaded_data["inventory"]
-        transaction_history = loaded_data["transaction_history"]
-        return inventory, transaction_history
+            inventory = json.load(file)
+        return inventory
     except FileNotFoundError:
-        return [], []
+        return []
 
 
-def save_inventory(inventory, transaction_history):
-    combined_data = {
-        "inventory": inventory,
-        "transaction_history": transaction_history
-    }
-    
+def save_inventory(inventory):
     # Write the inventory list first
     with open("inventory.json", "w", encoding="utf-8") as file:
-        json.dump(combined_data, file, indent=4)
+        json.dump(inventory, file, indent=4)
 
 
 def main():
@@ -96,31 +92,27 @@ def main():
     inventory = 0
     failed_entries = 0
     inventory = []
-    transaction_history = []
     
     # try to load existing data first
-    (inventory, transaction_history) = load_inventory()
+    inventory = load_inventory()
     
     while True:
         (product, quantity) = get_valid_input()
         
         # check if quit or quantity is invalid
         if product == "quit":
-            # save existing inventory and transaction history
-            save_inventory(inventory, transaction_history)
+            generate_report(inventory, failed_entries)
             
-            # generate_report(deliveries_count, failed_entries)
-            print(inventory)
+            # save existing inventory and transaction history
+            save_inventory(inventory)
             break
         elif product == "invalid":
             print("Invalid input. Please enter a valid positive number.")
             failed_entries += 1
             continue
         
-        
         # pass the name, quantity and the current inventory list
         curr_item = process_delivery(product, quantity, inventory)
-        transaction_history.append(curr_item)
         print(f"\nNew Order Added:\nID:{curr_item[0]}, {curr_item[1]}, {curr_item[2]}\n")
     
     
