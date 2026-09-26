@@ -67,7 +67,7 @@ def generate_report(inventory, failed_entries):
     #print inventory
     print(f"\n-----------------\nINVENTORY\n-----------------\n")
     for item in inventory:
-        print(f"ID: {item[ITEM_FIELDS["id"]]}. Product: {item[ITEM_FIELDS["name"]]}, Quantity: {item[ITEM_FIELDS["quantity"]]}, Transaction History: {", ".join(str(i) for i in item[ITEM_FIELDS["transaction_history"]])}\n")
+        print(f'ID: {item[ITEM_FIELDS["id"]]}. Product: {item[ITEM_FIELDS["name"]]}, Quantity: {item[ITEM_FIELDS["quantity"]]}, Transaction History: {", ".join(str(i) for i in item[ITEM_FIELDS["transaction_history"]])}\n')
     return
 
 
