@@ -1,3 +1,6 @@
+# Imports
+import json
+
 # Global Constant
 MAX_CAPACITY = 500
 TAX_RATE = 0.1 # 10% tax rate
@@ -64,6 +67,30 @@ def generate_report(transaction_history, failed_entries):
     return
 
 
+def load_inventory():
+    # check if json exist if not return empty
+    try:
+        with open("inventory.json", "r", encoding="utf-8") as file:
+            loaded_data = json.load(file)
+
+        inventory = loaded_data["inventory"]
+        transaction_history = loaded_data["transaction_history"]
+        return inventory, transaction_history
+    except FileNotFoundError:
+        return [], []
+
+
+def save_inventory(inventory, transaction_history):
+    combined_data = {
+        "inventory": inventory,
+        "transaction_history": transaction_history
+    }
+    
+    # Write the inventory list first
+    with open("inventory.json", "w", encoding="utf-8") as file:
+        json.dump(combined_data, file, indent=4)
+
+
 def main():
     # local variables
     inventory = 0
@@ -71,12 +98,17 @@ def main():
     inventory = []
     transaction_history = []
     
+    # try to load existing data first
+    (inventory, transaction_history) = load_inventory()
+    
     while True:
         (product, quantity) = get_valid_input()
         
-        
         # check if quit or quantity is invalid
         if product == "quit":
+            # save existing inventory and transaction history
+            save_inventory(inventory, transaction_history)
+            
             # generate_report(deliveries_count, failed_entries)
             print(inventory)
             break
@@ -89,6 +121,7 @@ def main():
         # pass the name, quantity and the current inventory list
         curr_item = process_delivery(product, quantity, inventory)
         transaction_history.append(curr_item)
+        print(f"\nNew Order Added:\nID:{curr_item[0]}, {curr_item[1]}, {curr_item[2]}\n")
     
     
 if __name__=="__main__":
