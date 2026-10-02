@@ -2,15 +2,34 @@
 import json
 
 # Global Constant
+INVENTORY_FILE = "inventory.json"
 MAX_CAPACITY = 500
-TAX_RATE = 0.1 # 10% tax rate
-# Define data structure
-ITEM_FIELDS = {
-    "id": 0,
-    "name": 1,
-    "quantity": 2,
-    "transaction_history": 3
-}
+TAX_RATE = 0.1 # 10% 
+
+
+'''
+MENU
+'''
+def getMenuOption():
+    print("\n----------- MENU -----------"+
+        "\n1. Display All Products"+
+        "\n2. Add Product" + 
+        "\n3. Update Stock" + 
+        "\n4. Search Product" + 
+        "\n5. Save Inventory" + 
+        "\n6. Exit" +
+        "\n----------------------------")
+    try:
+        option_input = int(input("Enter option: "))
+        if option_input >= 1 and option_input <=6:
+            return option_input
+        else:
+            return None
+    except ValueError:
+        print("Invalid Option. Please enter a number from 1 to 6.");
+        return None
+    
+
 
 # get input for product name, quantity and validate
 def get_valid_input():
@@ -89,14 +108,37 @@ def save_inventory(inventory):
 
 def main():
     # local variables
-    inventory = 0
     failed_entries = 0
-    inventory = []
-    
-    # try to load existing data first
     inventory = load_inventory()
     
     while True:
+        # prompt option
+        option = getMenuOption()
+        
+        match option:
+            # all case that is not 1-6
+            case 1:
+                return
+            case 2:
+                return
+            case 3:
+                return
+            case 4:
+                return
+            case 5:
+                return
+            case 6:
+                return
+            case _:
+                # invalid menu input (message already shown by getMenuOption)
+                failed_entries += 1
+        
+        
+        '''
+        match option_input:
+            # 1 to 6 option
+            case 1: 
+        
         (product, quantity) = get_valid_input()
         
         # check if quit or quantity is invalid
@@ -115,6 +157,8 @@ def main():
         curr_item = process_delivery(product, quantity, inventory)
         print(f"\nNew Order Added:\nID:{curr_item[0]}, {curr_item[1]}, {curr_item[2]}\n")
     
+    
+    '''
     
 if __name__=="__main__":
     main()
