@@ -1,0 +1,11 @@
+[
+    {
+        "id": 0,
+        "name": "iphone",
+        "price": 2000.0,
+        "quantity": 40,
+        "transaction_history": [
+            40
+        ]
+    }
+]
