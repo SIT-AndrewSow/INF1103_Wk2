@@ -135,7 +135,22 @@ def update_stock(inventory):
     print("Stock updated successfully!")
     return True
 
+def search_product(inventory):
+    print("\nSearch Product")
+    product_id = input("Enter Product ID: ")
+        
+    item = find_by_id(product_id, inventory)
+    if item is None:
+        print("Product not found.")
+        return False
 
+    print("Product Found")
+    print("-" * 48)
+    print(f"ID: {item['id']}")
+    print(f"Name: {item['name']}")
+    print(f"Price: ${item['price']:.2f}")
+    print(f"Stock: {item['quantity']}")
+    print("-" * 48)
 
 
 # Inventory Lookups
@@ -220,7 +235,7 @@ def main():
                 if not update_stock(inventory):
                     failed_entries += 1
             case 4:
-                return
+                search_product(inventory)
             case 5:
                 print("\nSaving inventory...")
                 if save_inventory(inventory):
