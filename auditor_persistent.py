@@ -27,7 +27,6 @@ def getMenuOption():
         return None
     
 
-
 #input helper
 def get_input_price(prompt):
     try:
@@ -73,11 +72,11 @@ def process_delivery(product_id, product, price, quantity, inventory):
 def add_product(inventory):
     #Returns True if the entry was accepted, False if it was rejected.
     print("\nAdd New Product")
-    name = input("Product Name: ").strip()
+    name = input("Product Name: ")
 
     # Get product name
     if not name:
-        print("Product ID and name cannot be empty.")
+        print("Product name cannot be empty.")
         return False
 
     # Get/update price
@@ -107,12 +106,44 @@ def add_product(inventory):
               f"Stock increased to {item['quantity']}.")
     return True
 
+def update_stock(inventory):
+    print("\nUpdate Stock")
+    
+    # Get/update price
+    product_id = input("Enter Product ID: ")
+    
+    item = find_by_id(product_id, inventory)
+    if item is None:
+        print("Product not found.")
+        return False
+
+    print("Product Found:")
+    print(f"Name: {item['name']}")
+    print(f"Current Stock: {item['quantity']}")
+
+    new_quantity = get_input_quantity("New Stock Quantity: ")
+    if new_quantity is None:
+        print(f"Invalid quantity. Please enter a whole number from 0 to {MAX_CAPACITY}.")
+        return False
+
+    # record the change (e.g. +10 or -5) so the history still adds up to the stock
+    change = new_quantity - item["quantity"]
+    item["quantity"] = new_quantity
+    if change != 0:
+        item["transaction_history"].append(change)
+
+    print("Stock updated successfully!")
+    return True
+
+
 
 
 # Inventory Lookups
 def find_by_id(product_id, inventory):
+    if not product_id.isdecimal():
+        return None
     for item in inventory:
-        if item["name"].lower() == product_id.lower():
+        if item["id"] == int(product_id):
             return item
     return None
 
@@ -122,6 +153,8 @@ def find_by_name(product_name, inventory):
             return item
     return None
 
+
+# General Display Data
 def display_all(inventory):
     print("\nCurrent Inventory")
     print("-" * 48)
@@ -131,6 +164,15 @@ def display_all(inventory):
         print(f"ID: {item['id']} | Name: {item['name']} | "
               f"Price: ${item['price']:.2f} | Stock: {item['quantity']}")
     print("-" * 48)
+
+def generate_report(inventory, failed_entries):
+    print(f"\nThe number of Failed/Rejected Entries: {failed_entries}.")
+
+    print("\n-----------------\nTRANSACTION HISTORY\n-----------------")
+    for item in inventory:
+        history = ", ".join(str(i) for i in item["transaction_history"])
+        print(f"ID: {item['id']}. Product: {item['name']}, "
+              f"Quantity: {item['quantity']}, Transaction History: {history}")
 
 
 # Load and Save inventory data
@@ -175,13 +217,21 @@ def main():
                 if not add_product(inventory):
                     failed_entries += 1
             case 3:
-                return
+                if not update_stock(inventory):
+                    failed_entries += 1
             case 4:
                 return
             case 5:
-                return
+                print("\nSaving inventory...")
+                if save_inventory(inventory):
+                    print(f"Inventory saved successfully to {INVENTORY_FILE}.")
             case 6:
-                return
+                generate_report(inventory, failed_entries)
+                print("\nSaving inventory before exit...")
+                if save_inventory(inventory):
+                    print("Inventory saved successfully.")
+                print("Program terminated.")
+                break
             case _:
                 # invalid menu input (message already shown by getMenuOption)
                 failed_entries += 1
