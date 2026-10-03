@@ -6,10 +6,7 @@ INVENTORY_FILE = "inventory.json"
 MAX_CAPACITY = 500
 TAX_RATE = 0.1 # 10% 
 
-
-'''
-MENU
-'''
+# Menu options
 def getMenuOption():
     print("\n----------- MENU -----------"+
         "\n1. Display All Products"+
@@ -31,74 +28,123 @@ def getMenuOption():
     
 
 
-# get input for product name, quantity and validate
-def get_valid_input():
-    # Get product name and quantity
-    input_name = input("Enter product name: ")
-    if input_name == "quit":
-        return "quit", 0
-    
-    input_quantity = input("Enter a stock quantity: ")
-    if input_quantity == "quit":
-        return "quit", 0
-    
-    # check if the input is a number
-    if not input_quantity.isdigit():
-        return "invalid", 0
-    
-    return input_name, int(input_quantity)
+#input helper
+def get_input_price(prompt):
+    try:
+        input_price = float(input(prompt))
+    except ValueError:
+        return None
+    if input_price >= 0:
+        return input_price
+    return None
+
+def get_input_quantity(prompt):
+    input_quantity = input(prompt)
+    if not input_quantity.isdecimal():
+        return None
+    input_quantity = int(input_quantity)
+    if input_quantity <= MAX_CAPACITY:
+        return input_quantity
+    return None
 
 
-# check item
-def find_item(product, inventory):
-    for item in inventory:
-        if item[ITEM_FIELDS["name"]].lower() == product.lower():
-            return item[ITEM_FIELDS["id"]]
-    return False
+#Menu Options
+def process_delivery(product_id, product, price, quantity, inventory):
+    item = find_by_name(product, inventory)
 
-
-# Check if item exist in the list if not just add append to items
-def process_delivery(product, quantity, inventory):
-    
-    # find if the same item exist in the inventory
-    item_id = find_item(product, inventory)
-    
-    if item_id is False:
+    if item is None:
         # create a new item
-        item_id = len(inventory)
-        inventory.append([item_id, product, quantity, [quantity]])
+        item = {
+            "id": product_id,
+            "name": product,
+            "price": price,
+            "quantity": quantity,
+            "transaction_history": [quantity],
+        }
+        inventory.append(item)
+        return item, True
+
+    # item exists, so append to its history and update stock and price
+    item["transaction_history"].append(quantity)
+    item["quantity"] += quantity
+    item["price"] = price
+    return item, False
+
+def add_product(inventory):
+    #Returns True if the entry was accepted, False if it was rejected.
+    print("\nAdd New Product")
+    name = input("Product Name: ").strip()
+
+    # Get product name
+    if not name:
+        print("Product ID and name cannot be empty.")
+        return False
+
+    # Get/update price
+    price = get_input_price("Price: ")
+    if price is None:
+        print("Invalid price. Please enter a number of 0 or more.")
+        return False
+
+    # Get/update quantity
+    quantity = get_input_quantity("Stock Quantity: ")
+    if quantity is None:
+        print(f"Invalid quantity. Please enter a whole number from 0 to {MAX_CAPACITY}.")
+        return False
+
+    # exceed max cap
+    existing = find_by_name(name, inventory)
+    if existing is not None and existing["quantity"] + quantity > MAX_CAPACITY:
+        print(f"Rejected: total stock for {existing['name']} would exceed {MAX_CAPACITY}.")
+        return False
+
+    product_id = len(inventory)
+    item, is_new = process_delivery(product_id, name, price, quantity, inventory)
+    if is_new:
+        print("Product added successfully!")
     else:
-        # item exist, so append!
-        inventory[item_id][ITEM_FIELDS["transaction_history"]].append(quantity)
-        inventory[item_id][ITEM_FIELDS["quantity"]] += quantity
-        
-    # return the item for transaction history
-    return [item_id, product, quantity]
+        print(f"{item['name']} already exists (ID: {item['id']}). "
+              f"Stock increased to {item['quantity']}.")
+    return True
 
 
-def calculate_tax(amount):
-    return amount * TAX_RATE
 
-
-def generate_report(inventory, failed_entries):
-    print(f"\nThe number of Failed/Rejected Entries:{failed_entries}.")
-    
-    #print inventory
-    print(f"\n-----------------\nINVENTORY\n-----------------\n")
+# Inventory Lookups
+def find_by_id(product_id, inventory):
     for item in inventory:
-        print(f'ID: {item[ITEM_FIELDS["id"]]}. Product: {item[ITEM_FIELDS["name"]]}, Quantity: {item[ITEM_FIELDS["quantity"]]}, Transaction History: {", ".join(str(i) for i in item[ITEM_FIELDS["transaction_history"]])}\n')
-    return
+        if item["name"].lower() == product_id.lower():
+            return item
+    return None
+
+def find_by_name(product_name, inventory):
+    for item in inventory:
+        if item["name"].lower() == product_name.lower():
+            return item
+    return None
+
+def display_all(inventory):
+    print("\nCurrent Inventory")
+    print("-" * 48)
+    if not inventory:
+        print("No products in inventory.")
+    for item in inventory:
+        print(f"ID: {item['id']} | Name: {item['name']} | "
+              f"Price: ${item['price']:.2f} | Stock: {item['quantity']}")
+    print("-" * 48)
 
 
+# Load and Save inventory data
 def load_inventory():
     # check if json exist if not return empty
     try:
         with open("inventory.json", "r", encoding="utf-8") as file:
             inventory = json.load(file)
-        return inventory
     except FileNotFoundError:
+        print("Inventory file not found. Start with empty inventory")
         return []
-
+    
+    print("Invenotory loaded successfully")
+    return inventory
 
 def save_inventory(inventory):
     # Write the inventory list first
@@ -106,9 +152,15 @@ def save_inventory(inventory):
         json.dump(inventory, file, indent=4)
 
 
+# Main function
 def main():
     # local variables
     failed_entries = 0
+    
+    print("=" * 40)
+    print("INVENTORY MANAGEMENT SYSTEM")
+    print("=" * 40)
+    
     inventory = load_inventory()
     
     while True:
@@ -118,9 +170,10 @@ def main():
         match option:
             # all case that is not 1-6
             case 1:
-                return
+                display_all(inventory)
             case 2:
-                return
+                if not add_product(inventory):
+                    failed_entries += 1
             case 3:
                 return
             case 4:
@@ -132,33 +185,8 @@ def main():
             case _:
                 # invalid menu input (message already shown by getMenuOption)
                 failed_entries += 1
-        
-        
-        '''
-        match option_input:
-            # 1 to 6 option
-            case 1: 
-        
-        (product, quantity) = get_valid_input()
-        
-        # check if quit or quantity is invalid
-        if product == "quit":
-            generate_report(inventory, failed_entries)
-            
-            # save existing inventory and transaction history
-            save_inventory(inventory)
-            break
-        elif product == "invalid":
-            print("Invalid input. Please enter a valid positive number.")
-            failed_entries += 1
-            continue
-        
-        # pass the name, quantity and the current inventory list
-        curr_item = process_delivery(product, quantity, inventory)
-        print(f"\nNew Order Added:\nID:{curr_item[0]}, {curr_item[1]}, {curr_item[2]}\n")
     
     
-    '''
-    
+# Call Main
 if __name__=="__main__":
     main()
