@@ -3,9 +3,21 @@
         "id": 0,
         "name": "iphone",
         "price": 2000.0,
-        "quantity": 40,
+        "quantity": 20,
         "transaction_history": [
-            40
+            40,
+            20,
+            -40
+        ]
+    },
+    {
+        "id": 1,
+        "name": "iphone 67",
+        "price": 670000.0,
+        "quantity": 57,
+        "transaction_history": [
+            67,
+            -10
         ]
     }
 ]

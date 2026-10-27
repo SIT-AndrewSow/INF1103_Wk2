@@ -6,6 +6,31 @@ INVENTORY_FILE = "inventory.json"
 MAX_CAPACITY = 500
 TAX_RATE = 0.1 # 10% 
 
+class Product:
+    def __init__(self, name, price, quantity):
+        self.name = name
+        self.price = price
+        self.quantity = quantity
+        
+
+    def do_something():
+        return
+
+class Inventory:
+    def __init__(self, products=None):
+        self.products = products if products is not None else []
+    
+    # stores product
+    # adds product
+    # searches product
+    
+    def add_product(self, product: Product):
+        self.products.append(product)
+    
+    def search_product(self, name):
+        return None
+        
+
 # Menu options
 def getMenuOption():
     print("\n----------- MENU -----------"+
