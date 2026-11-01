@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 
 class Product(ABC):
-    """Data and behaviour for a single item."""
-
     def __init__(self, product_id, name, price, quantity, transaction_history=None):
         self.id = product_id
         self.name = name
@@ -54,7 +52,14 @@ class Product(ABC):
         return (f"ID: {self.id} | Name: {self.name} | "
                 f"Price: ${self.price:.2f} | Stock: {self.quantity}")
 
-class PhysicalProduct(Product):
+
+class CanBeShipped(ABC):
+    @abstractmethod
+    def calculate_shipping_cost(self):
+        pass
+
+
+class PhysicalProduct(Product, CanBeShipped):
     def __init__(self, product_id, name, price, quantity, weight, transaction_history=None):
         super().__init__(product_id, name, price, quantity, transaction_history)
         self.weight = weight
@@ -66,6 +71,10 @@ class PhysicalProduct(Product):
     def get_fulfilment_info(self):
         print("This product requires physical shipping")
 
+    # base fee of 5 + 2.5 per kg
+    def calculate_shipping_cost(self):
+        return 5 + (2.50 * self.quantity * self.weight)
+        
 
 class DigitalProduct(Product):
     def __init__(self, product_id, name, price, quantity, download_size, transaction_history=None):
