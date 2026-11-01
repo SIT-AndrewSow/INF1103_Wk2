@@ -1,4 +1,6 @@
-class Product:
+from abc import ABC, abstractmethod
+
+class Product(ABC):
     """Data and behaviour for a single item."""
 
     def __init__(self, product_id, name, price, quantity, transaction_history=None):
@@ -23,6 +25,17 @@ class Product:
         if change != 0:
             self.transaction_history.append(change)
 
+    # display product information
+    @abstractmethod
+    def display_information(self):
+        print(f"ID: {self.id} | Name: {self.name} | Price: ${self.price:.2f} | Stock: {self.quantity}", end=" ")
+
+    # display a message explaining  that the product requires type of shipping
+    @abstractmethod
+    def get_fulfilment_info(self):
+        pass
+
+
     def to_dict(self):
         """JSON can't save objects directly, so convert to a dict."""
         return {
@@ -41,10 +54,27 @@ class Product:
         return (f"ID: {self.id} | Name: {self.name} | "
                 f"Price: ${self.price:.2f} | Stock: {self.quantity}")
 
-
 class PhysicalProduct(Product):
-    pass
+    def __init__(self, product_id, name, price, quantity, weight, transaction_history=None):
+        super().__init__(product_id, name, price, quantity, transaction_history)
+        self.weight = weight
+
+    def display_information(self):
+        super().display_information()
+        print(f"| Weight: {self.weight}KG")
+
+    def get_fulfilment_info(self):
+        print("This product requires physical shipping")
 
 
 class DigitalProduct(Product):
-    pass
+    def __init__(self, product_id, name, price, quantity, download_size, transaction_history=None):
+        super().__init__(product_id, name, price, quantity, transaction_history)
+        self.download_size = download_size
+
+    def display_information(self):
+        super().display_information()
+        print(f"| Download Size: {self.download_size}MB")
+
+    def get_fulfilment_info(self):
+        print("This product is delivered digitally")
