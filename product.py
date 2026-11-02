@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class Product(ABC):
     def __init__(self, product_id, name, price, quantity, transaction_history=None):
         self.id = product_id
@@ -26,14 +27,14 @@ class Product(ABC):
     # display product information
     @abstractmethod
     def display_information(self):
-        print(f"ID: {self.id} | Name: {self.name} | Price: ${self.price:.2f} | Stock: {self.quantity}", end=" ")
+        return f"ID: {self.id} | Name: {self.name} | Price: ${self.price:.2f} | Stock: {self.quantity}"
 
     # display a message explaining  that the product requires type of shipping
     @abstractmethod
     def get_fulfilment_info(self):
         pass
 
-
+    @abstractmethod
     def to_dict(self):
         """JSON can't save objects directly, so convert to a dict."""
         return {
@@ -45,12 +46,10 @@ class Product(ABC):
         }
 
     @classmethod
-    def from_dict(cls, d):
-        return cls(d["id"], d["name"], d["price"], d["quantity"], d["transaction_history"])
-
-    def __str__(self):
-        return (f"ID: {self.id} | Name: {self.name} | "
-                f"Price: ${self.price:.2f} | Stock: {self.quantity}")
+    @abstractmethod
+    def from_dict(cls, dict_item):
+        pass
+        # return cls(d["id"], d["name"], d["price"], d["quantity"], d["transaction_history"])
 
 
 class CanBeShipped(ABC):
@@ -60,30 +59,70 @@ class CanBeShipped(ABC):
 
 
 class PhysicalProduct(Product, CanBeShipped):
-    def __init__(self, product_id, name, price, quantity, weight, transaction_history=None):
+    def __init__(
+        self, product_id, name, price, quantity, weight, transaction_history=None
+    ):
         super().__init__(product_id, name, price, quantity, transaction_history)
         self.weight = weight
 
     def display_information(self):
-        super().display_information()
-        print(f"| Weight: {self.weight}KG")
+        return super().display_information() + f"| Weight: {self.weight}KG"
 
     def get_fulfilment_info(self):
-        print("This product requires physical shipping")
+        return "This product requires physical shipping"
 
-    # base fee of 5 + 2.5 per kg
+    # base fee + rate per kg
     def calculate_shipping_cost(self):
-        return 5 + (2.50 * self.quantity * self.weight)
-        
+        base_fee = 5.00
+        rate_per_kg = 2.50
+        return base_fee + (rate_per_kg * self.quantity * self.weight)
+
+    def to_dict(self):
+        physical_product = super().to_dict()
+        physical_product["weight"] = self.weight
+        physical_product["type"] = "physical"
+        return physical_product
+
+    @classmethod
+    def from_dict(cls, dict_item):
+        return cls(
+            dict_item["id"],
+            dict_item["name"],
+            dict_item["price"],
+            dict_item["quantity"],
+            dict_item["weight"], 
+            dict_item["transaction_history"],
+        )
+
 
 class DigitalProduct(Product):
-    def __init__(self, product_id, name, price, quantity, download_size, transaction_history=None):
+    def __init__(
+        self, product_id, name, price, quantity, download_size, transaction_history=None
+    ):
         super().__init__(product_id, name, price, quantity, transaction_history)
         self.download_size = download_size
 
     def display_information(self):
-        super().display_information()
-        print(f"| Download Size: {self.download_size}MB")
+        return (
+            super().display_information() + f"| Download Size: {self.download_size}MB"
+        )
 
     def get_fulfilment_info(self):
-        print("This product is delivered digitally")
+        return "This product is delivered digitally"
+
+    def to_dict(self):
+        physical_product = super().to_dict()
+        physical_product["download_size"] = self.download_size
+        physical_product["type"] = "digital"
+        return physical_product
+
+    @classmethod
+    def from_dict(cls, dict_item):
+        return cls(
+            dict_item["id"],
+            dict_item["name"],
+            dict_item["price"],
+            dict_item["quantity"],
+            dict_item["download_size"],
+            dict_item["transaction_history"]
+        )

@@ -8,7 +8,9 @@
             40,
             20,
             -40
-        ]
+        ],
+        "weight": 10,
+        "type": "physical"
     },
     {
         "id": 1,
@@ -18,6 +20,31 @@
         "transaction_history": [
             67,
             -10
-        ]
+        ],
+        "weight": 67,
+        "type": "physical"
+    },
+    {
+        "id": 2,
+        "name": "apple",
+        "price": 2.22,
+        "quantity": 300,
+        "transaction_history": [
+            300
+        ],
+        "weight": 0.1,
+        "type": "physical"
+    },
+    {
+        "id": 3,
+        "name": "steal a brainrot",
+        "price": 67,
+        "quantity": 267,
+        "transaction_history": [
+            367,
+            -100
+        ],
+        "download_size": 67,
+        "type": "digital"
     }
 ]
