@@ -1,7 +1,6 @@
 # Imports
 from product import PhysicalProduct
 from inventory import Inventory
-from icecream import ic
 
 # Global Constants
 INVENTORY_FILE = "inventory.json"

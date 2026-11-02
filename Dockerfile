@@ -2,6 +2,6 @@ FROM python:3.11-slim
 
 WORKDIR /usr/src/app
 
-COPY auditor_persistent.py .
+COPY main.py inventory.py product.py
 
-CMD ["python", "auditor_persistent.py"]
+CMD ["python", "main.py"]
