@@ -1,4 +1,5 @@
-from product import DigitalProduct, PhysicalProduct, Product
+from models.physical_product import PhysicalProduct
+from models.digital_product import DigitalProduct
 import json
 
 PRODUCT_TYPES = {

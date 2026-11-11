@@ -1,6 +1,6 @@
 # Imports
-from product import PhysicalProduct
-from inventory import Inventory
+from models.physical_product import PhysicalProduct
+from models.inventory import Inventory
 
 # Global Constants
 INVENTORY_FILE = "inventory.json"
