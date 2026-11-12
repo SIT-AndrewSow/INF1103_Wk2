@@ -106,7 +106,7 @@ def add_product(inventory):
             return False
 
     # Check if item exist alr and attempt to add on if not maxed
-    existing = inventory.find_by_name(name)
+    existing = inventory.find_product_by_name(name)
     if existing is not None and existing.quantity + quantity > MAX_CAPACITY:
         print(f"Rejected: total stock for {existing.name} would exceed {MAX_CAPACITY}.")
         return False
@@ -127,7 +127,7 @@ def add_product(inventory):
 
 def update_stock(inventory):
     print("\nUpdate Stock")
-    product = inventory.find_by_id(input("Enter Product ID: "))
+    product = inventory.find_product_by_id(input("Enter Product ID: "))
     if product is None:
         print("Product not found.")
         return False
@@ -150,7 +150,7 @@ def update_stock(inventory):
 
 def search_product(inventory):
     print("\nSearch Product")
-    product = inventory.find_by_id(input("Enter Product ID: "))
+    product = inventory.find_product_by_id(input("Enter Product ID: "))
     if product is None:
         print("Product not found.")
         return False

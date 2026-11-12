@@ -27,7 +27,7 @@ class Inventory:
             return 0
         return max(p.id for p in self.products) + 1
 
-    def find_by_id(self, product_id):
+    def find_product_by_id(self, product_id) -> Product | None:
         if not product_id.isdecimal():
             return None
         for p in self.products:
@@ -35,7 +35,7 @@ class Inventory:
                 return p
         return None
 
-    def find_by_name(self, name):
+    def find_product_by_name(self, name):
         for p in self.products:
             if p.name.lower() == name.lower():
                 return p
@@ -44,9 +44,9 @@ class Inventory:
     # ---------------------------------------------------------------
     # Important functions
     # ---------------------------------------------------------------
-    def add_or_restock(self, type, name, price, quantity, weight=0, download_size=0):
+    def add_or_restock(self, type, name, price, quantity, weight=0, download_size=0) -> None:
         """Returns (product, is_new)."""
-        existing = self.find_by_name(name)
+        existing = self.find_product_by_name(name)
 
         # if it does not exist add new
         if existing is None:
@@ -65,6 +65,12 @@ class Inventory:
         # if it exist update the stock
         existing.add_stock(quantity, price)
         return existing, False
+
+    def remove_product_by_id(self, product_id: str | int) -> Product | None:
+        for idx, p in enumerate(self.products):
+            if str(p.id) == str(product_id):
+                return self.products.pop(idx)
+        return None
 
     def display_all(self):
         print("\nCurrent Inventory")
