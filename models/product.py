@@ -1,12 +1,22 @@
 from abc import ABC, abstractmethod
+from models.supplier import Supplier
 
 
 class Product(ABC):
-    def __init__(self, product_id, name, price, quantity, transaction_history=None):
+    def __init__(
+        self,
+        product_id: int | str,
+        name: str,
+        price: float,
+        quantity: int,
+        supplier: Supplier,
+        transaction_history: list[int] | None = None,
+    ) -> None:
         self.id = product_id
         self.name = name
         self.price = price
         self.quantity = quantity
+        self.supplier: Supplier = supplier
         self.transaction_history = (
             transaction_history if transaction_history is not None else [quantity]
         )
@@ -26,8 +36,11 @@ class Product(ABC):
 
     # display product information
     @abstractmethod
-    def display_information(self):
-        return f"ID: {self.id} | Name: {self.name} | Price: ${self.price:.2f} | Stock: {self.quantity}"
+    def display_information(self) -> str:
+        return (
+            f"ID: {self.id} | Name: {self.name} | Price: ${self.price:.2f} | "
+            f"Stock: {self.quantity} | Supplier: {self.supplier.name}"
+        )
 
     # display a message explaining  that the product requires type of shipping
     @abstractmethod
@@ -90,7 +103,7 @@ class Product(ABC):
 #             dict_item["name"],
 #             dict_item["price"],
 #             dict_item["quantity"],
-#             dict_item["weight"], 
+#             dict_item["weight"],
 #             dict_item["transaction_history"],
 #         )
 

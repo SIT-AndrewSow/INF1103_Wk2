@@ -1,11 +1,19 @@
 from models.product import Product
+from models.supplier import Supplier
 
 
 class DigitalProduct(Product):
     def __init__(
-        self, product_id, name, price, quantity, download_size, transaction_history=None
-    ):
-        super().__init__(product_id, name, price, quantity, transaction_history)
+        self,
+        product_id: int | str,
+        name: str,
+        price: float,
+        quantity: int,
+        download_size: float,
+        supplier: Supplier,
+        transaction_history: list[int] | None = None
+    ) -> None:
+        super().__init__(product_id, name, price, quantity, supplier, transaction_history)
         self.download_size = download_size
 
     def display_information(self):

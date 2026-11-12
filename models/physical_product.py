@@ -1,12 +1,22 @@
 from models.can_be_shipped import CanBeShipped
 from models.product import Product
+from models.supplier import Supplier
 
 
 class PhysicalProduct(Product, CanBeShipped):
     def __init__(
-        self, product_id, name, price, quantity, weight, transaction_history=None
-    ):
-        super().__init__(product_id, name, price, quantity, transaction_history)
+        self,
+        product_id: int | str,
+        name: str,
+        price: float,
+        quantity: int,
+        weight: float,
+        supplier: Supplier,
+        transaction_history: list[int] | None = None,
+    ) -> None:
+        super().__init__(
+            product_id, name, price, quantity, supplier, transaction_history
+        )
         self.weight = weight
 
     def display_information(self):

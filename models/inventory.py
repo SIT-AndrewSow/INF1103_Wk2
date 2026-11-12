@@ -1,5 +1,6 @@
 from models.physical_product import PhysicalProduct
 from models.digital_product import DigitalProduct
+from models.product import Product
 import json
 
 PRODUCT_TYPES = {
@@ -12,7 +13,7 @@ class Inventory:
     """Holds all products and handles lookups, display and saving."""
 
     def __init__(self, products=None):
-        self.products = products if products is not None else []
+        self.products: list[Product] = products if products is not None else []
 
     # ---------------------------------------------------------------
     # Find id helper
