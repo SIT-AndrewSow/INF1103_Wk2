@@ -81,10 +81,6 @@ class Inventory:
             product_str = (
                 product.display_information() + " | " + product.get_fulfilment_info()
             )
-            if isinstance(product, PhysicalProduct):
-                product_str += (
-                    f" | Shipping Cost: ${product.calculate_shipping_cost():.2f}"
-                )
             print(product_str)
         print("-" * 100)
 

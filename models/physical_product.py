@@ -20,10 +20,11 @@ class PhysicalProduct(Product, CanBeShipped):
         self.weight = weight
 
     def display_information(self):
-        return super().display_information() + f"| Weight: {self.weight}KG"
+        return super().display_information() + f"| Weight: {self.weight}kg"
 
-    def get_fulfilment_info(self):
-        return "This product requires physical shipping"
+    def get_fulfilment_info(self) -> str:
+        # Keep your existing fulfilment info (e.g. weight/dimensions) and append shipping cost
+        return f"This product requires physical shipping | Shipping Cost: ${self.calculate_shipping_cost():.2f}"
 
     # base fee + rate per kg
     def calculate_shipping_cost(self) -> float:
