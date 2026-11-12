@@ -26,7 +26,7 @@ class PhysicalProduct(Product, CanBeShipped):
         return "This product requires physical shipping"
 
     # base fee + rate per kg
-    def calculate_shipping_cost(self):
+    def calculate_shipping_cost(self) -> float:
         base_fee = 5.00
         rate_per_kg = 2.50
         return base_fee + (rate_per_kg * self.quantity * self.weight)
