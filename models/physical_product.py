@@ -1,3 +1,5 @@
+from typing import Any
+
 from models.can_be_shipped import CanBeShipped
 from models.product import Product
 from models.supplier import Supplier
@@ -17,9 +19,9 @@ class PhysicalProduct(Product, CanBeShipped):
         super().__init__(
             product_id, name, price, quantity, supplier, transaction_history
         )
-        self.weight = weight
+        self.weight: float = weight
 
-    def display_information(self):
+    def display_information(self) -> str:
         return super().display_information() + f"| Weight: {self.weight}kg"
 
     def get_fulfilment_info(self) -> str:
@@ -32,19 +34,30 @@ class PhysicalProduct(Product, CanBeShipped):
         rate_per_kg = 2.50
         return base_fee + (rate_per_kg * self.quantity * self.weight)
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, object]:
         physical_product = super().to_dict()
         physical_product["weight"] = self.weight
         physical_product["type"] = "physical"
         return physical_product
 
     @classmethod
-    def from_dict(cls, dict_item):
+    def from_dict(cls, dict_item: dict[str, Any]) -> "PhysicalProduct":
+        supplier_data = dict_item.get("supplier")
+        if isinstance(supplier_data, dict):
+            supplier = Supplier(
+                supplier_data.get("supplier_id", "S000"),
+                supplier_data.get("name", "Unknown Supplier"),
+                supplier_data.get("contact_email", "unknown@supplier.com"),
+            )
+        else:
+            supplier = Supplier("S000", "Generic Supplier", "info@example.com")
+
         return cls(
             dict_item["id"],
             dict_item["name"],
             dict_item["price"],
             dict_item["quantity"],
             dict_item["weight"],
-            dict_item["transaction_history"],
+            supplier,
+            dict_item.get("transaction_history"),
         )

@@ -1,9 +1,13 @@
 # Imports
 from models.physical_product import PhysicalProduct
+from models.digital_product import DigitalProduct
+from models.supplier import Supplier
+from models.supplier_manager import SupplierManager
 from models.inventory import Inventory
 
 # Global Constants
 INVENTORY_FILE = "inventory.json"
+SUPPLIERS_FILE = "suppliers.json"
 MAX_CAPACITY = 500
 TAX_RATE = 0.1  # 10%
 
@@ -16,21 +20,23 @@ def get_menu_option():
         "\n----------- MENU -----------"
         "\n1. Display All Products"
         "\n2. Add Product"
-        "\n3. Update Stock"
-        "\n4. Search Product"
-        "\n5. Save Inventory"
-        "\n6. Exit"
+        "\n3. Add Supplier"
+        "\n4. Update Stock"
+        "\n5. Search Product"
+        "\n6. Save Inventory"
+        "\n7. Display All Suppliers"
+        "\n8. Exit"
         "\n----------------------------"
     )
     try:
         option_input = int(input("Enter option: "))
     except ValueError:
-        print("Invalid Option. Please enter a number from 1 to 6.")
+        print("Invalid Option. Please enter a number from 1 to 8.")
         return None
 
-    if 1 <= option_input <= 6:
+    if 1 <= option_input <= 8:
         return option_input
-    print("Invalid Option. Please enter a number from 1 to 6.")
+    print("Invalid Option. Please enter a number from 1 to 8.")
     return None
 
 
@@ -65,10 +71,94 @@ def choose_option(prompt, valid_options):
     return None
 
 
+def get_supplier_for_product(supplier_manager: SupplierManager) -> Supplier | None:
+    """Prompt user to choose an existing supplier or enter a new supplier."""
+    supplier_list = supplier_manager.get_all_suppliers()
+
+    if supplier_list:
+        print("\nSupplier Options:")
+        print("1. Select an existing supplier")
+        print("2. Enter a new supplier")
+        choice = choose_option("Choose option", ["1", "2"])
+        if choice == "1":
+            print("\nExisting Suppliers:")
+            for idx, s in enumerate(supplier_list, start=1):
+                print(f"[{idx}] {s.display_information()}")
+            sel_input = input(
+                f"Select supplier (1-{len(supplier_list)} or enter Supplier ID): "
+            ).strip()
+            if sel_input.isdigit():
+                sel = int(sel_input)
+                if 1 <= sel <= len(supplier_list):
+                    return supplier_list[sel - 1]
+            for s in supplier_list:
+                if s.supplier_id.lower() == sel_input.lower():
+                    return s
+            print("Invalid supplier selection.")
+            return None
+        elif choice != "2":
+            return None
+
+    # Enter new supplier
+    print("\n--- Enter Supplier Details ---")
+    supplier_id = input("Supplier ID: ").strip()
+    if not supplier_id:
+        print("Supplier ID cannot be empty.")
+        return None
+
+    existing_supplier = supplier_manager.find_supplier_by_id(supplier_id)
+    if existing_supplier:
+        print(
+            f"Supplier ID '{supplier_id}' already exists ({existing_supplier.name}). Using this supplier."
+        )
+        return existing_supplier
+
+    supplier_name = input("Supplier Name: ").strip()
+    if not supplier_name:
+        print("Supplier name cannot be empty.")
+        return None
+
+    supplier_email = input("Supplier Contact Email: ").strip()
+    if not supplier_email:
+        print("Supplier email cannot be empty.")
+        return None
+
+    new_supplier = Supplier(supplier_id, supplier_name, supplier_email)
+    supplier_manager.add_supplier(new_supplier)
+    return new_supplier
+
+
+def add_supplier(supplier_manager: SupplierManager) -> bool:
+    print("\nAdd New Supplier")
+    supplier_id = input("Supplier ID: ").strip()
+    if not supplier_id:
+        print("Supplier ID cannot be empty.")
+        return False
+
+    if supplier_manager.find_supplier_by_id(supplier_id) is not None:
+        print(f"Supplier with ID '{supplier_id}' already exists.")
+        return False
+
+    supplier_name = input("Supplier Name: ").strip()
+    if not supplier_name:
+        print("Supplier name cannot be empty.")
+        return False
+
+    supplier_email = input("Supplier Contact Email: ").strip()
+    if not supplier_email:
+        print("Supplier email cannot be empty.")
+        return False
+
+    supplier = Supplier(supplier_id, supplier_name, supplier_email)
+    supplier_manager.add_supplier(supplier)
+    print(f"Supplier '{supplier_name}' (ID: {supplier_id}) added successfully!")
+    return True
+
+
 # ---------------------------------------------------------------
 # Menu actions. Each returns True if accepted, False if rejected.
 # ---------------------------------------------------------------
-def add_product(inventory):
+def add_product(inventory, supplier_manager: SupplierManager):
     print("\nAdd New Product")
 
     name = input("Product Name: ").strip()
@@ -105,23 +195,33 @@ def add_product(inventory):
             print("Invalid download size. Please enter a number of 0 or more.")
             return False
 
-    # Check if item exist alr and attempt to add on if not maxed
+    # Check if item exists already and update stock
     existing = inventory.find_product_by_name(name)
-    if existing is not None and existing.quantity + quantity > MAX_CAPACITY:
-        print(f"Rejected: total stock for {existing.name} would exceed {MAX_CAPACITY}.")
+    if existing is not None:
+        if existing.quantity + quantity > MAX_CAPACITY:
+            print(f"Rejected: total stock for {existing.name} would exceed {MAX_CAPACITY}.")
+            return False
+        existing.add_stock(quantity, price)
+        print(
+            f"{existing.name} already exists (ID: {existing.id}). "
+            f"Stock increased to {existing.quantity}."
+        )
+        return True
+
+    # If it is new, obtain supplier details (Association)
+    supplier = get_supplier_for_product(supplier_manager)
+    if supplier is None:
+        print("Product creation cancelled: valid supplier required.")
         return False
 
-    # Add product to inventory here
-    product, is_new = inventory.add_or_restock(
-        product_type, name, price, quantity, weight=weight, download_size=download_size
-    )
-    if is_new:
-        print("Product added successfully!")
+    new_id = inventory.next_id()
+    if product_type == "physical":
+        product = PhysicalProduct(new_id, name, price, quantity, weight, supplier)
     else:
-        print(
-            f"{product.name} already exists (ID: {product.id}). "
-            f"Stock increased to {product.quantity}."
-        )
+        product = DigitalProduct(new_id, name, price, quantity, download_size, supplier)
+
+    inventory.add_product(product)
+    print("Product added successfully!")
     return True
 
 
@@ -176,6 +276,8 @@ def main():
     print("=" * 40)
 
     inventory = Inventory.load(INVENTORY_FILE)
+    supplier_manager = SupplierManager.load(SUPPLIERS_FILE)
+    supplier_manager.populate_from_products(inventory.products)
 
     while True:
         option = get_menu_option()
@@ -184,22 +286,31 @@ def main():
             case 1:
                 inventory.display_all()
             case 2:
-                if not add_product(inventory):
+                if not add_product(inventory, supplier_manager):
                     failed_entries += 1
             case 3:
-                if not update_stock(inventory):
+                if not add_supplier(supplier_manager):
                     failed_entries += 1
             case 4:
-                search_product(inventory)
+                if not update_stock(inventory):
+                    failed_entries += 1
             case 5:
-                print("\nSaving inventory...")
-                if inventory.save(INVENTORY_FILE):
-                    print(f"Inventory saved successfully to {INVENTORY_FILE}.")
+                search_product(inventory)
             case 6:
+                print("\nSaving inventory and suppliers...")
+                inv_saved = inventory.save(INVENTORY_FILE)
+                sup_saved = supplier_manager.save(SUPPLIERS_FILE)
+                if inv_saved and sup_saved:
+                    print(
+                        f"Data saved successfully to {INVENTORY_FILE} and {SUPPLIERS_FILE}."
+                    )
+            case 7:
+                supplier_manager.display_all()
+            case 8:
                 inventory.generate_report(failed_entries)
-                print("\nSaving inventory before exit...")
-                if inventory.save(INVENTORY_FILE):
-                    print(f"Inventory saved successfully to {INVENTORY_FILE}.")
+                print("\nSaving inventory and suppliers before exit...")
+                inventory.save(INVENTORY_FILE)
+                supplier_manager.save(SUPPLIERS_FILE)
                 print("Program terminated.")
                 break
             case _:
